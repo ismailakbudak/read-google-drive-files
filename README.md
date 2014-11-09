@@ -7,11 +7,12 @@ Full Information:
 
 https://developers.google.com/drive/quickstart-python
 
-## Config
-==================
+## Config 
 Change your `config.py` file :
 + `CLIENT_ID='YOUR_CLIENT_ID'` 
 + `SECRET_ID='YOUR_SECRET_ID'`
+
+## Usage
 + run `pip install --upgrade google-api-python-client`  on terminal
 + run `python read.py` for read
 + run `python upload.py` for upload
