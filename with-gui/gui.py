@@ -6,21 +6,20 @@
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
+# Developer
+# Ismail AKBUDAK
+# ismailakbudak.com
 
- 
+
 #/**************  Added for drive api *******************/
-import json   
-from apiclient.http import MediaFileUpload
-import httplib2  
+import json, os, sys, httplib2, oauth2client.client
+from apiclient.http import MediaFileUpload  
 from apiclient.discovery import build
-import oauth2client.client
 from config import *
-import os, sys
-#from oauth2client.client import OAuth2WebServerFlow
 #/************** End of drive api   *******************/
+
 from PyQt4 import QtCore, QtGui
  
-
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -36,14 +35,14 @@ except AttributeError:
 
 # Application UI
 class Ui_MainWindow(object):
-    #/**************  Added for drive api *******************/
-    credentials =  oauth2client.client.Credentials.new_from_json(open('conf.json','r').read())
-    http = httplib2.Http()
-    http = credentials.authorize(http)
-    drive_service = build('drive', 'v2', http=http)
+    #/**************  Added for drive api gloabal variable *******************/
     flow = ''
-    #/************** End of drive api   *******************/
-    def setupUi(self, MainWindow):
+    http = httplib2.Http()
+    drive_service = None
+    credentials = None
+    service_status = False
+    #/************** End of drive api gloabal variable *******************/
+    def setupUi(self, MainWindow): 
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.resize(800, 540)
         self.centralwidget = QtGui.QWidget(MainWindow)
@@ -175,7 +174,30 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabRead), _translate("MainWindow", "Read File", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabUpload), _translate("MainWindow", "Upload File ", None))
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-      
+        self.initialize()
+    
+    # Conf.json - initialize check
+    def get_authorize_check(self):
+        if self.service_status == False:
+            self.labelStatusSettings.setText("You should authorize your account before the process..") 
+            self.tabWidget.setCurrentIndex(1)
+            return
+         
+    # Load credentials from conf.json
+    def initialize(self):
+        try:
+            self.credentials =  oauth2client.client.Credentials.new_from_json(open('conf.json','r').read())
+            self.http = self.credentials.authorize(self.http)
+            self.drive_service = build('drive', 'v2', http=self.http)
+            self.service_status = True
+        except Exception, error:
+            print 'An error occurred: %s' % error
+            self.drive_service = None
+            self.credentials = None
+            self.labelStatusSettings.setText("You should authorize your account..") 
+            self.tabWidget.setCurrentIndex(1)
+            self.service_status = False
+
     # Common Part -  Set table items
     def setTableData(self, datas):
         row = 0
@@ -196,29 +218,35 @@ class Ui_MainWindow(object):
             row = row + 1
 
     # Read - read cloud files        
-    def read(self): 
-        result = []
-        page_token = None 
-        while True:
-          param = {}
-          if page_token:
-            param['pageToken'] = page_token
-          files = self.drive_service.files().list(**param).execute()
-          result.extend(files['items'])
-          page_token = files.get('nextPageToken')
-          if not page_token:
-            break
-        datas = []    
-        for response in result:
-            json.dumps(response, sort_keys=True, indent=4)
-            if int(response['quotaBytesUsed']) > 0 :
-                val = response
-                datas.append(val)
-        self.labelStatusRead.setText( 'List of all files from drive..') 
-        self.setTableData(datas)   
+    def read(self):
+        self.get_authorize_check()
+        try:
+            result = []
+            page_token = None 
+            while True:
+              param = {}
+              if page_token:
+                param['pageToken'] = page_token
+              files = self.drive_service.files().list(**param).execute()
+              result.extend(files['items'])
+              page_token = files.get('nextPageToken')
+              if not page_token:
+                break
+            datas = []    
+            for response in result:
+                json.dumps(response, sort_keys=True, indent=4)
+                if int(response['quotaBytesUsed']) > 0 :
+                    val = response
+                    datas.append(val)
+            self.labelStatusRead.setText( 'List of all files from drive..') 
+            self.setTableData(datas)   
+        except Exception, error:
+            print 'An error occurred: %s' % error
+            self.labelStatusRead.setText( 'The files could not listed..')  
      
     # Upload - upload file to cloud
     def upload(self):  
+        self.get_authorize_check() 
         # Path to the file to upload
         FILENAME = self.labelFile.text() #'text.txt'
         FILENAME = str(FILENAME).strip()          
@@ -279,9 +307,11 @@ class Ui_MainWindow(object):
                 open('conf.json','w').write(credentials.to_json())
                 self.labelStatusSettings.setText("Configuration has been set successfully..")
                 self.lineCode.setText('')
+                self.initialize()
             else:
                 self.labelStatusSettings.setText("Code field must be bigger than 10 characters..")                  
-        except Exception, e:
+        except Exception, error:
+            print 'An error occurred: %s' % error
             self.labelStatusSettings.setText("There is something wrong..")
     
     # Upload - open file dialog
@@ -307,6 +337,7 @@ class Ui_MainWindow(object):
       Returns:
         The inserted permission if successful, None otherwise.
       """
+      self.get_authorize_check() 
       value = 'anyone'
       perm_type = 'anyone'
       role = 'writer'
@@ -325,7 +356,6 @@ class Ui_MainWindow(object):
 
     def update_file(self, file_id ):
       """Update an existing file's metadata and content.
-
       Args:
         service: Drive API service instance.
         file_id: ID of the file to update.
@@ -337,6 +367,7 @@ class Ui_MainWindow(object):
       Returns:
         Updated file metadata if successful, None otherwise.
       """
+      self.get_authorize_check() 
       try:
         # First retrieve the file from the API.
         file = service.files().get(fileId=file_id).execute()
@@ -346,10 +377,7 @@ class Ui_MainWindow(object):
         # File's new metadata.
         file['title'] = new_filename
         file['description'] = description
-        file['mimeType'] = new_mime_type
-        file['shared'] = 'false'
-        # File's new content.
-        #media_body = MediaFileUpload( new_filename, mimetype='text/plain', resumable=True)
+        file['mimeType'] = new_mime_type 
         # Send the request to the API.
         updated_file = service.files().update(
             fileId=file_id,
@@ -366,13 +394,7 @@ class Win(QtGui.QDialog,Ui_MainWindow):
 
 # Main application
 if __name__ == "__main__":
-    import sys
-    #app = QtGui.QApplication(sys.argv)
-    #MainWindow = QtGui.QMainWindow()
-    #ui = Ui_MainWindow()
-    #ui.setupUi(MainWindow)
-    #MainWindow.show()
-    #sys.exit(app.exec_())
+    import sys 
     app = QtGui.QApplication(sys.argv)
     MWindow = Win()
     MWindow.show()

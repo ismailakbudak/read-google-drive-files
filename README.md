@@ -1,21 +1,11 @@
-read-google-drive-files-python
+read-google-drive-files-python gui and terminal
 ===================
 
-Sample application to upload and read google drive files from api with python
+## TERMINAL
++ look `with-terminal` folder
 
-Full Information:
-
-https://developers.google.com/drive/quickstart-python
-
-## Config 
-Change your `config.py` file :
-+ `CLIENT_ID='YOUR_CLIENT_ID'` 
-+ `SECRET_ID='YOUR_SECRET_ID'`
-
-## Usage
-+ run `pip install --upgrade google-api-python-client`  on terminal
-+ run `python read.py` for read
-+ run `python upload.py` for upload
+## GUI
++ look `with-gui` folder  
  
 
 

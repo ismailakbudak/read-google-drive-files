@@ -17,7 +17,7 @@ After first run you can use `conf.json` file :
 
 ## Usage
 + run `pip install --upgrade google-api-python-client`  on terminal 
- 
++ run `python main.py`  
 
 
 
