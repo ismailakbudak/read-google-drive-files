@@ -19,8 +19,46 @@ class helper(nymph):
     #
     #return:
     def listen(self,words):
+    	data=json.loads(open('data.json','r').read())
+    	func={
+    	    'read_OK':read_handler,
+    	    'upload_OK':upload_Handler,
+    	    'get_authorize_url_OK':get_authorize_url_Handler,
+    	    'set_credentials_OK':set_credentials_Handler,
+    	    'download_OK':download_Handler,
+    	    'sendMessage_OK':sendMessage_Handler,
+    	    'setNode_OK':setNode_Handler,    	    
+    	    'error_OK':error_Manager_Handler,
+    	}
+    	if(words in func):
+    	    func[words](data)
+    	else:
+    	    error_Manager_Handler()
     	print(words)
+    	
+    def read_Handler(self,data):
+    	pass
     
+    def upload_Handler(self,data):
+    	pass
+    	
+    def get_authorize_url_Handler(self,data):
+    	pass
+    		
+    def set_credentials_Handler(self,data):
+    	pass
+    
+    def download_Handler(self,data):
+    	pass
+    	
+    def sendMessage_Handler(self,data):
+    	pass
+    
+    def setNode_Handler(self,data):
+    	pass
+    
+    def error_Manager_Handler(self,data):
+    	pass
     #sayFormat processes sending data to other nymph
     #
     #parameters:
@@ -88,8 +126,9 @@ class helper(nymph):
     #set the Other GDManager Node
     #
     #parameters:
-    #	words
+    #	nymphdata
     #
     #return:
     def setNode(self,nymphdata):
     	self.say("setNode")
+    	
