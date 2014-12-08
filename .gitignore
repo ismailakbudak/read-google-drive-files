@@ -5,8 +5,8 @@
 #   git config --global core.excludesfile '~/.gitignore_global'
 
 # Ignore created files
-/with-gui/*.pyc
-/with-terminal/*.pyc
+*.pyc
+*.pyc
 
 # Ignore config files
 config/settings.local.yml
