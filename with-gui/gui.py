@@ -287,32 +287,31 @@ class Ui_MainWindow(object):
     
     # Settings - get authorize url
     def settings(self):
-        global flow  
         OAUTH_SCOPE = 'https://www.googleapis.com/auth/drive'
         REDIRECT_URI = 'urn:ietf:wg:oauth:2.0:oob'
-        flow = oauth2client.client.OAuth2WebServerFlow(CLIENT_ID, CLIENT_SECRET, OAUTH_SCOPE, REDIRECT_URI)
-        authorize_url = flow.step1_get_authorize_url()
+        self.flow = oauth2client.client.OAuth2WebServerFlow(CLIENT_ID, CLIENT_SECRET, OAUTH_SCOPE, REDIRECT_URI)
+        authorize_url = self.flow.step1_get_authorize_url()
         #print ("\nGo to the permission link : \n"  + authorize_url )
         self.labelStatusSettings.setText('<html> <a style = \'text-decoration:none\' href =\''+authorize_url+'\'>Go to Authorize Url</a></html>')
     
     # Settings  - set settings    
     def configSet(self):
-        global flow   
+            
         #code = raw_input('\nVerification code: ').strip()
         try:
             code =  self.lineCode.text()
             code =  str(code).strip() 
             if len(code) > 10:  
-                credentials = flow.step2_exchange(code)
-                open('conf.json','w').write(credentials.to_json())
+                self.credentials = self.flow.step2_exchange(code)
+                open('conf.json','w').write(self.credentials.to_json())
                 self.labelStatusSettings.setText("Configuration has been set successfully..")
                 self.lineCode.setText('')
-                self.initialize()
             else:
                 self.labelStatusSettings.setText("Code field must be bigger than 10 characters..")                  
         except Exception, error:
             print 'An error occurred: %s' % error
             self.labelStatusSettings.setText("There is something wrong..")
+        self.initialize()    
     
     # Upload - open file dialog
     def openFile(self):
