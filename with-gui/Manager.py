@@ -28,7 +28,7 @@ class GDManager(nymph):
     Args: 
       None
     Returns:
-      None
+      Boolean Service status
     '''
     def init(self):
         try:
@@ -42,7 +42,7 @@ class GDManager(nymph):
             self.http           = None
             self.credentials    = None 
             self.service_status = False
-    
+        return self.service_status
     '''
     Nymph listen method override
     Args: 
@@ -54,31 +54,49 @@ class GDManager(nymph):
         
         print(words)
         if words=="read":
-            ret= self.read()
+            #args None
+            #return Array file_informations
+            ret= self.read() 
 
             self.say("read_OK")
         elif words=="upload":
-            ret= self.upload("d.py",True)#filename, is_sharable
-
+            #args string filename
+            #args boolean is_sharable
+            #return  True or False
+            ret= self.upload("test_start.py",True)
             self.say("upload_OK")
         elif words=="get_authorize_url":
+            #args None 
+            #return string  authorize_url  or ''  
             ret= self.get_authorize_url()
 
             self.say("authorization_OK")
         elif words=="set_credentials":
-            ret= self.set_credentials("asdasdasdasd")#authenticationcode
+            #args string code
+            #return True or False
+            ret= self.set_credentials("asdasdasdasd")
 
             self.say("credentials_OK")
         elif words=="init":
+            #args None
+            #return True or False - self.service_status 
             ret= self.init()
 
             self.say("init_OK") 
         elif words=="talk":
+            #args nymphdata value
+            #args string message
+            #return  boolean True, False
+
             #TODO
             #self.talkWith()#nymphdata
             #self.say()#message
             self.talkWith(self.interfaceNymphData)
             self.say("talk_OK")
+            ret=True
+        else:
+            ret=False 
+        open('data.json','w').write( json.JSONEncoder().encode({'result': ret}) )
 
     '''
     Message format for ui
@@ -117,9 +135,17 @@ class GDManager(nymph):
         except Exception, error:
             print 'An error occurred: %s' % error
             datas = []
-        ## Todo
-        # Get a few properties    
-        return datas 
+        ## Get a few properties
+        files = []
+        for data in datas:
+            item = []  
+            item.append( data['title']          )  
+            item.append( data['quotaBytesUsed'] )  
+            item.append( str(data['shared'])    )  
+            item.append( data['webContentLink'] )
+            files.append(item)  
+          
+        return files 
       
     '''
     Insert a new permission.
