@@ -51,51 +51,53 @@ class GDManager(nymph):
       None
     '''
     def listen(self,words):
-        
-        print(words)
-        if words=="read":
+        # format of json words
+        # '{ "query": "function_name", "0": "first_arg", "1": "second_arg" }'
+        words=json.loads( words );
+        if words['query']=="read":
             #args None
             #return Array file_informations
             ret= self.read() 
-
-            self.say("read_OK")
-        elif words=="upload":
+        elif words['query']=="upload":
             #args string filename
             #args boolean is_sharable
             #return  True or False
-            ret= self.upload("test_start.py",True)
-            self.say("upload_OK")
-        elif words=="get_authorize_url":
+            ret= self.upload( words['0'], words['1'] )
+        elif words['query']=="get_authorize_url":
             #args None 
             #return string  authorize_url  or ''  
             ret= self.get_authorize_url()
-
-            self.say("authorization_OK")
-        elif words=="set_credentials":
+        elif words['query']=="set_credentials":
             #args string code
             #return True or False
-            ret= self.set_credentials("asdasdasdasd")
-
-            self.say("credentials_OK")
-        elif words=="init":
+            ret= self.set_credentials( words['0'] )
+        elif words['query']=="init":
             #args None
             #return True or False - self.service_status 
             ret= self.init()
-
-            self.say("init_OK") 
-        elif words=="talk":
+        elif words['query']=="talk":
             #args nymphdata value
             #args string message
             #return  boolean True, False
+            self.error=None
+            self.talkWith( words['0'] )#nymphdata
+            if self.error!=None:
+                ret=False
+            else:    
+                self.say( words['1'] )#message
+                if self.error!=None:
+                    ret=False
+                else:
+                    self.talkWith(self.interfaceNymphData)
+                    if self.error!=None:
+                        ret=False
+                    else:
+                        ret=True 
 
-            #TODO
-            #self.talkWith()#nymphdata
-            #self.say()#message
-            self.talkWith(self.interfaceNymphData)
-            self.say("talk_OK")
-            ret=True
         else:
-            ret=False 
+            words['error']# default query
+            ret=False
+        self.say( words['query']+'_OK' )     
         open('data.json','w').write( json.JSONEncoder().encode({'result': ret}) )
 
     '''
