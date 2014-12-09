@@ -155,7 +155,8 @@ class GDManager(nymph):
         except Exception, error:
             print 'An error occurred: %s' % error
             words={'query': "error"} 
-
+        
+        print(words)
         # TODO improvemnet
         # Check if connection is exist
         self.talkWith(self.interfaceNymphData).say( words['query']+'_OK' )  

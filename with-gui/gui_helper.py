@@ -105,7 +105,7 @@ class helper(nymph):
     #
     #return:
     def upload(self,filename,is_share):    
-        self.say('{ "query": "upload", "0": "' + filename + '", "1": "' + is_share + '" }')
+        self.say('{ "query": "upload", "0": "%s", "1": "%s" }' % ( filename, str(is_share) ))
         
     #return an authorize url
     #
@@ -123,7 +123,7 @@ class helper(nymph):
     #
     #return:
     def set_credentials(self, authorization_code):
-        self.say('{ "query": "set_credentials", "0": "' + authorization_code + '" }')
+        self.say('{ "query": "set_credentials", "0": "%s" }' % (authorization_code) )
         
     #download the url   
     #
@@ -132,15 +132,17 @@ class helper(nymph):
     #
     #return:
     def download(self,url):
-        self.say('{ "query": "download", "0": "'+url+'" }')
+        self.say('{ "query": "download", "0": "%s" }' % (url) )
     
-        
+    def init():
+        self.say('{ "query": "init" }')    
     #set the Other GDManager Node
     #
     #parameters:
     #   nymphdata
     #
     #return:
-    def talk(self,nymphdata,message):
-        self.say('{ "query": "talk", "0": "'+nymphdata.NAME+'", "1": "'+nymphdata.HOST+'", "2": "'+nymphdata.PORT+'", "3": "'+message+'" }')
+    def talk(self,nymphdata,message,message_type):
+        a = (nymphdata.NAME, nymphdata.HOST, str(nymphdata.PORT), message, message_type )
+        self.say('{ "query": "talk", "0": "%s", "1": "%s", "2": "%s", "3": "%s", "4": "%s" }' % a)
         
