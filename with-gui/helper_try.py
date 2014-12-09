@@ -1,8 +1,8 @@
 from gui_helper import *
 
 class helpertry(helper):
-    def __init__(self,nymphdata):
-        super(helpertry,self).__init__(nymphdata)
+    def __init__(self,nymphdata,managerNymphData):
+        super(helpertry,self).__init__(nymphdata,managerNymphData)
         
     def listen_url_Handler(self,data):
         print(data)

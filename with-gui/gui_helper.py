@@ -9,8 +9,11 @@ import json
 ###
 class helper(nymph):
     # helper is a nymph
-    def __init__(self,nymphdata):
+    def __init__(self,nymphdata,managerNymphData):
         super(helper,self).__init__(nymphdata)
+        self.managerNymphData = managerNymphData
+        self.talkWith(managerNymphData)
+
     
     #listen is processes coming data to other nymph
     #
@@ -22,14 +25,14 @@ class helper(nymph):
         print(words)
         data=json.loads(open('data.json','r').read())
         func={
-            'read_OK':read_handler,
-            'upload_OK':upload_Handler,
-            'get_authorize_url_OK':get_authorize_url_Handler,
-            'set_credentials_OK':set_credentials_Handler,
-            'download_OK':download_Handler,
-            'message_OK':listen_message_Handler,  
-            'url_OK':listen_url_Handler,          
-            'error_OK':error_Manager_Handler,
+            'read_OK':              self.read_Handler,
+            'upload_OK':            self.upload_Handler,
+            'get_authorize_url_OK': self.get_authorize_url_Handler,
+            'set_credentials_OK':   self.set_credentials_Handler,
+            'download_OK':          self.download_Handler,
+            'message_OK':           self.listen_message_Handler,  
+            'url_OK':               self.listen_url_Handler,          
+            'error_OK':             self.error_Manager_Handler,
         }
         if(words in func):
             func[words](data)
@@ -76,6 +79,9 @@ class helper(nymph):
     #
     #return:
     def sayFormat(self,words):
+        # TODO
+        # Check if connection is exist
+        #self.talkWith(self.managerNymphData)
         return words
     
     #read trigger read proccess and return results

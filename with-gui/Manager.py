@@ -19,6 +19,7 @@ class GDManager(nymph):
     def __init__(self, nymphData,interfaceNymphData):
         super(GDManager, self).__init__(nymphData)
         self.interfaceNymphData=interfaceNymphData
+        self.talkWith(interfaceNymphData)
         self.http = httplib2.Http()
         self.init()
 
@@ -139,7 +140,9 @@ class GDManager(nymph):
         else:
             words['error']# default query
             ret=False
-        self.say( words['query']+'_OK' )     
+        # TODO
+        # Check if connection is exist
+        self.talkWith(self.interfaceNymphData).say( words['query']+'_OK' )     
         open('data.json','w').write( json.JSONEncoder().encode({'result': ret}) )
 
     '''
