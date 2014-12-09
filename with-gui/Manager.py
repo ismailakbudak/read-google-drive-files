@@ -33,11 +33,20 @@ class GDManager(nymph):
     '''
     def init(self):
         try:
-            conf = open('conf.json','r').read()
-            self.credentials    = oauth2client.client.Credentials.new_from_json(conf)
-            self.http           = self.credentials.authorize(self.http)
-            self.drive_service  = build('drive', 'v2', http=self.http)
-            self.service_status = True
+            f = open('conf.json','r')
+            try:
+                conf = f.read()
+                status=True 
+            except Exception, error:
+                print 'An error occurred: %s' % error
+                status=False 
+            finally:
+                f.close()
+            if status:
+                self.credentials    = oauth2client.client.Credentials.new_from_json(conf)
+                self.http           = self.credentials.authorize(self.http)
+                self.drive_service  = build('drive', 'v2', http=self.http)
+                self.service_status = True
         except Exception, error:
             print 'An error occurred: %s' % error
             self.drive_service  = None
@@ -90,14 +99,17 @@ class GDManager(nymph):
             #args-0 nymphdata name value                 
             #args-1 nymphdata host value                 
             #args-2 nymphdata port value                 
-            #args-3 string message
+            #args-3 string url
+            #args-4 string title
             #return {"name": "n_name", "host":"n_host", "port":"n_port", "":"url" }       
             ret={   
                 "0": words['0'], 
                 "1": words['1'], 
                 "2": str(words['2']), 
-                "3": words['3'] 
+                "3": words['3'],
+                "4": words['4'] 
             }
+            self.download_url(words['3'], words['4'] )
             #nymphdata(name,host,port) and url
         elif words['query']=="message":
             #sender nymphdata( words['0'], words['1'], int(words['2']))
@@ -121,15 +133,21 @@ class GDManager(nymph):
             #args-3 string message                       
             #args-4 string message type - url or message 
             #return  boolean True, False
-            # '{ "query": "talk", "0": "name", "1": "host", "2": "port", "3": "content", "4": "type" }'
+            # '{ "query": "talk", "0": "name", "1": "host", "2": "port", "3": "message_content", "4": "message" }'
+            # '{ "query": "talk", "0": "name", "1": "host", "2": "port", "3": "url-link", "4": "url", "5": "title" }'
             self.error=None
             self.talkWith( nymphdata( words['0'], words['1'], int(words['2'])) )#nymphdata(name,host,port)
             if self.error!=None:
                 ret=False
             else:    
-                # format of message 
-                # '{ "query": "url-or-message", "0": "name", "1": "host", "2": "port", "3": "content" }'
-                if words['4']=="url" or words['4']=="message" :
+                if words['4']=="url":
+                    # format of message 
+                    # '{ "query": "url-or-message", "0": "name", "1": "host", "2": "port", "3": "url-link", "4": "title" }'
+                    a=(words['4'], self.myN.NAME, self.myN.HOST, str(self.myN.PORT), words['3'], words['5'] )
+                    self.say( '{ "query": "%s", "0": "%s", "1": "%s", "2": "%s", "3": "%s", "4": "%s" }' % a  ) #nymphdata(name,host,port) and message
+                elif words['4']=="message" :
+                    # format of message 
+                    # '{ "query": "url-or-message", "0": "name", "1": "host", "2": "port", "3": "message"  }'
                     a=(words['4'], self.myN.NAME, self.myN.HOST, str(self.myN.PORT), words['3'] )
                     self.say( '{ "query": "%s", "0": "%s", "1": "%s", "2": "%s", "3": "%s" }' % a  ) #nymphdata(name,host,port) and message
                 else:
@@ -150,12 +168,14 @@ class GDManager(nymph):
             ret=False
 
         # wrie and send response    
+        f = open('data.json','w')
         try:
-            open('data.json','w').write( json.JSONEncoder().encode({'result': ret}) )
+            f.write( json.JSONEncoder().encode({'result': ret}) )
         except Exception, error:
             print 'An error occurred: %s' % error
             words={'query': "error"} 
-        
+        finally:
+            f.close()
         print(words)
         # TODO improvemnet
         # Check if connection is exist
@@ -245,8 +265,56 @@ class GDManager(nymph):
             return True
         except errors.HttpError, error:
             print 'An error occurred: %s' % error
-        return False      
-     
+        return False
+    
+    # Download file from url       
+    def download_url(download_url,title):    
+        # Download 
+        if download_url:
+            resp, content =  self.drive_service._http.request(download_url)
+            if resp.status == 200:
+                f = open(title,'w')
+                try:
+                    f.write(content)
+                    status=True
+                except Exception, error:
+                    print 'An error occurred: %s' % error
+                    status=False
+                finally:
+                    f.close()
+            else:
+              print 'An error occurred: %s' % resp
+              status=False
+        else:
+            # The file doesn't have any content stored on Drive.
+            print("you dont have this file")
+            status=False
+        return status 
+
+    # Download file with coming in response  json        
+    def download(response):    
+        # Download
+        download_url = response['downloadUrl']
+        if download_url:
+            resp, content =  self.drive_service._http.request(download_url)
+            if resp.status == 200:
+                f = open(response['title'],'w')
+                try:
+                    f.write(content)
+                    status=True
+                except Exception, error:
+                    print 'An error occurred: %s' % error
+                    status=False
+                finally:
+                    f.close()
+            else:
+              print 'An error occurred: %s' % resp
+              status=False
+        else:
+            # The file doesn't have any content stored on Drive.
+            print("you dont have this file")
+            status=False
+        return status     
     '''
     Upload file to cloud
     Args: 
@@ -307,13 +375,24 @@ class GDManager(nymph):
       True or False.
     '''   
     def set_credentials(self, authorization_code):
+        status=False
         try:   
             self.credentials = self.flow.step2_exchange(authorization_code)
-            open('conf.json','w').write(self.credentials.to_json())
+            f = open('conf.json','w')
+            try:
+                f.write(self.credentials.to_json())
+                status=True
+            except Exception, error:
+                print 'An error occurred: %s' % error
+                status=False 
+            finally:
+                f.close()
         except Exception, error:
             print 'An error occurred: %s' % error
-            return False 
-        return True    
+            status=False 
+        if status:
+            self.init()     
+        return status    
 
     '''Update an existing file's metadata and content.
     Args:

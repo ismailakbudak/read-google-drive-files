@@ -16,7 +16,10 @@ class helpertry(helper):
     
     def upload_Handler(self,data):
         print(data)
-        
+    
+    def init_Handler(self,data):
+        pass
+
     def get_authorize_url_Handler(self,data):
         print(data)
                 
@@ -26,11 +29,5 @@ class helpertry(helper):
     def download_Handler(self,data):
         print(data)
         
-    def sendMessage_Handler(self,data):
-        print(data)
-    
-    def setNode_Handler(self,data):
-        print(data)
-    
     def error_Manager_Handler(self,data):
         print(data)

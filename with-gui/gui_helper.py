@@ -23,11 +23,14 @@ class helper(nymph):
     #return:
     def listen(self,words):
         print(words)
+        f = open('data.json','r')
         try:
-            data=json.loads(open('data.json','r').read())
+            data=json.loads(f.read())
         except Exception, error:
             data=None
             print"en error occured: %s " % (error)
+        finally:
+            f.close()    
         func={
             'read_OK':              self.read_Handler,
             'upload_OK':            self.upload_Handler,
@@ -36,7 +39,8 @@ class helper(nymph):
             'download_OK':          self.download_Handler,
             'message_OK':           self.listen_message_Handler,  
             'url_OK':               self.listen_url_Handler,          
-            'error_OK':             self.error_Manager_Handler,
+            'error_OK':             self.error_Manager_Handler,       
+            'init_OK':              self.init_Handler,
         }
         if(words in func):
             func[words](data)
@@ -58,7 +62,10 @@ class helper(nymph):
     
     def upload_Handler(self,data):
         pass
-        
+    
+    def init_Handler(self,data):
+        pass
+
     def get_authorize_url_Handler(self,data):
         pass
                 
@@ -66,12 +73,6 @@ class helper(nymph):
         pass
     
     def download_Handler(self,data):
-        pass
-        
-    def sendMessage_Handler(self,data):
-        pass
-    
-    def setNode_Handler(self,data):
         pass
     
     def error_Manager_Handler(self,data):
