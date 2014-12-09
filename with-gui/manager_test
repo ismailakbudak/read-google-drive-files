@@ -1,24 +1,22 @@
 #!/usr/bin/python
 import os
 import sys
+
 from Manager import *; ismail=GDManager(erdem,ismail)
 
+from Manager import *; ismail=GDManager(erdem,ismail)
+
+
+
+
+
 print(ismail.listen('read'))
-
-
 ismail.listen('{ "query": "upload" }')
 ismail.listen('{ "query": "read" }')
 ismail.listen('{ "query": "talk", "0": "name", "1": "host", "2": "port", "message": "{"type": "url", "0": "content" }" }')
-
 print(ismail.read())
-
 ismail.__del__() 
-
 from json; a=json.loads('{ "content": "'+'test1'+'", "type": "'+ 'test2' +'" }')
-
 json.JSONEncoder().encode({'result': ret})
-
-
 ret = '{ "query": "url-or-message", "0": "name", "1": "host", "2": "port", "3": "content" }'
-
 a=json.load('{ "query": "talk", "0": "name", "1": "host", "2": "port", "message": "{"type": "url", "0": "content" }" }')
