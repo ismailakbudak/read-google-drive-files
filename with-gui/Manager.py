@@ -51,6 +51,7 @@ class GDManager(nymph):
       None
     '''
     def listen(self,words):
+        print(words)
         # format of json words
         # '{ "query": "function_name", "0": "first_arg", "1": "second_arg" }'
         words=json.loads( words );
