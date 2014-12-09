@@ -59,8 +59,8 @@ class GDManager(nymph):
             #return Array file_informations
             ret= self.read() 
         elif words['query']=="upload":
-            #args string filename
-            #args boolean is_sharable
+            #args-0 string filename
+            #args-1 boolean is_sharable
             #return  True or False
             ret= self.upload( words['0'], words['1'] )
         elif words['query']=="get_authorize_url":
@@ -68,23 +68,64 @@ class GDManager(nymph):
             #return string  authorize_url  or ''  
             ret= self.get_authorize_url()
         elif words['query']=="set_credentials":
-            #args string code
+            #args-0 string code
             #return True or False
             ret= self.set_credentials( words['0'] )
         elif words['query']=="init":
             #args None
             #return True or False - self.service_status 
             ret= self.init()
+        elif words['query']=="url":
+            #sender nymphdata( words['0'], words['1'], int(words['2']))
+            #message words['3']
+            #args-0 nymphdata name value                 
+            #args-1 nymphdata host value                 
+            #args-2 nymphdata port value                 
+            #args-3 string message
+            #return {"name": "n_name", "host":"n_host", "port":"n_port", "":"url" }       
+            ret={   
+                "0": words['0'], 
+                "1": words['1'], 
+                "2": str(words['2']), 
+                "3": words['3'] 
+            }
+            #nymphdata(name,host,port) and url
+        elif words['query']=="message":
+            #sender nymphdata( words['0'], words['1'], int(words['2']))
+            #message words['3']
+            #args-0 nymphdata name value                 
+            #args-1 nymphdata host value                 
+            #args-2 nymphdata port value                 
+            #args-3 string message
+            #return {"name": "n_name", "host":"n_host", "port":"n_port", "":"message" }  
+            ret={   
+                "0": words['0'], 
+                "1": words['1'], 
+                "2": str(words['2']), 
+                "3": words['3'] 
+            }
+            #nymphdata(name,host,port) and message    
         elif words['query']=="talk":
-            #args nymphdata value
-            #args string message
+            #args-0 nymphdata name value                 
+            #args-1 nymphdata host value                 
+            #args-2 nymphdata port value                 
+            #args-3 string message                       
+            #args-4 string message type - url or message 
             #return  boolean True, False
+            # '{ "query": "talk", "0": "name", "1": "host", "2": "port", "3": "content", "4": "type" }'
             self.error=None
-            self.talkWith( words['0'] )#nymphdata
+            self.talkWith( nymphdata( words['0'], words['1'], int(words['2'])) )#nymphdata(name,host,port)
             if self.error!=None:
                 ret=False
             else:    
-                self.say( words['1'] )#message
+                # format of message 
+                # '{ "query": "url-or-message", "0": "name", "1": "host", "2": "port", "3": "content" }'
+                if words['4']=="url" or words['4']=="message" :
+                    a=(words['4'], self.myN.NAME, self.myN.HOST, str(self.myN.PORT), words['3'] )
+                    self.say( '{ "query": "%s", "0": "%s", "1": "%s", "2": "%s", "3": "%s" }' % a  ) #nymphdata(name,host,port) and message
+                else:
+                    self.error="unexpected_event"
+
                 if self.error!=None:
                     ret=False
                 else:
