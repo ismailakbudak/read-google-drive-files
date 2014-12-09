@@ -19,6 +19,7 @@ class helper(nymph):
     #
     #return:
     def listen(self,words):
+        print(words)
         data=json.loads(open('data.json','r').read())
         func={
             'read_OK':read_handler,
@@ -36,15 +37,15 @@ class helper(nymph):
             error_Manager_Handler('')
         print(words)
         
-
-    
+    ###
+    #	Handlers For events between two GDManager
     def listen_url_Handler(self,data):
         pass
     
     def listen_message_Handler(self,data):
         pass
-    
-    
+    ###
+    #	Handlers For events between gui and GDManager
     def read_Handler(self,data):
         pass
     
@@ -102,8 +103,7 @@ class helper(nymph):
     #
     #return:
     def get_authorize_url(self):
-        '{ "query": "get_authorize_url" }'
-        self.say("get_authorize_url")
+        self.say('{ "query": "get_authorize_url" }')
         
         
     #set the credentials  
