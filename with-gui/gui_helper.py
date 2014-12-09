@@ -41,7 +41,7 @@ class helper(nymph):
         if(words in func):
             func[words](data)
         else:
-            error_Manager_Handler('')
+            self.error_Manager_Handler('')
         print(words)
         
     ###

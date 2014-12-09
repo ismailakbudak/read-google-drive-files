@@ -15,15 +15,6 @@ halil=nymphdata('halil','127.0.0.1',8893)
 nihal=nymphdata('nihal','127.0.0.1',8894)
 nuran=nymphdata('nuran','127.0.0.1',8895)
 
-
-realis=nymphdata('akbudak','192.168.2.127',8090)
-realisgui=nymphdata('akbudak','192.168.2.127',8091)
-
-realer=nymphdata('aybek','192.168.2.118',8092)
-realergui=nymphdata('aybek','192.168.2.118',8093)
-
-
-
 from Manager import *; erdem=GDManager(erdem,ismail)
 from IP import *; from helper_try import *; erdem_gui=helpertry(ismail,erdem) 
 
@@ -50,4 +41,21 @@ from Manager import *; h=GDManager(halil,nuran)
 
 #create a nymph example
 #ismail=nymph(ismail)
+
+# Real world is here cruel world
+#im=nymphdata('akbudak','192.168.1.24',8080)
+#ig=nymphdata('akbudak','192.168.1.24',8081)
+
+# Run this
+from Manager import *; i=GDManager(im,ig)
+from IP import *; from helper_try import *; ig=helpertry(ig,im) 
+
+
+
+
+
+e=nymphdata('aybek','192.168.1.206', 8082)
+eg=nymphdata('aybek','192.168.1.206',8083)
+
+
 

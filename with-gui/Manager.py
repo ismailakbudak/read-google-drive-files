@@ -61,7 +61,7 @@ class GDManager(nymph):
         except Exception, error:
             print 'An error occurred: %s' % error
             ret=error
-            words['query']="error"
+            words={'query': "error"} 
 
         if words['query']=="read":
             #args None
@@ -146,7 +146,7 @@ class GDManager(nymph):
         elif words['query']!="error": # there is an error above
             pass
         else: # default query
-            words['query']="error"
+            words={'query': "error"} 
             ret=False
 
         # wrie and send response    
@@ -154,7 +154,7 @@ class GDManager(nymph):
             open('data.json','w').write( json.JSONEncoder().encode({'result': ret}) )
         except Exception, error:
             print 'An error occurred: %s' % error
-            words['query']="error"
+            words={'query': "error"} 
 
         # TODO improvemnet
         # Check if connection is exist

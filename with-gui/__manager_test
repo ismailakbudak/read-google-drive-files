@@ -6,10 +6,6 @@ from Manager import *; ismail=GDManager(erdem,ismail)
 
 from Manager import *; ismail=GDManager(erdem,ismail)
 
-
-
-
-
 print(ismail.listen('read'))
 ismail.listen('{ "query": "upload" }')
 ismail.listen('{ "query": "read" }')
