@@ -33,7 +33,8 @@ class GDManager(nymph):
     '''
     def init(self):
         try:
-            self.credentials    = oauth2client.client.Credentials.new_from_json(open('conf.json','r').read())
+            conf = open('conf.json','r').read()
+            self.credentials    = oauth2client.client.Credentials.new_from_json(conf)
             self.http           = self.credentials.authorize(self.http)
             self.drive_service  = build('drive', 'v2', http=self.http)
             self.service_status = True
@@ -55,7 +56,13 @@ class GDManager(nymph):
         print(words)
         # format of json words
         # '{ "query": "function_name", "0": "first_arg", "1": "second_arg" }'
-        words=json.loads( words );
+        try:
+            words=json.loads( words );
+        except Exception, error:
+            print 'An error occurred: %s' % error
+            ret=error
+            words['query']="error"
+
         if words['query']=="read":
             #args None
             #return Array file_informations
@@ -136,15 +143,22 @@ class GDManager(nymph):
                         ret=False
                     else:
                         ret=True 
-
-        else:
-            words['error']# default query
+        elif words['query']!="error": # there is an error above
+            pass
+        else: # default query
+            words['query']="error"
             ret=False
-        # TODO
-        # Check if connection is exist
-        self.talkWith(self.interfaceNymphData).say( words['query']+'_OK' )     
-        open('data.json','w').write( json.JSONEncoder().encode({'result': ret}) )
 
+        # wrie and send response    
+        try:
+            open('data.json','w').write( json.JSONEncoder().encode({'result': ret}) )
+        except Exception, error:
+            print 'An error occurred: %s' % error
+            words['query']="error"
+
+        # TODO improvemnet
+        # Check if connection is exist
+        self.talkWith(self.interfaceNymphData).say( words['query']+'_OK' )  
     '''
     Message format for ui
     Args: 
@@ -163,6 +177,7 @@ class GDManager(nymph):
       Array datas
     '''
     def read(self):
+        print("ok i got the message1")
         datas = []   
         try:
             result = []
@@ -183,13 +198,20 @@ class GDManager(nymph):
             print 'An error occurred: %s' % error
             datas = []
         ## Get a few properties
+        print("ok i got the message")
         files = []
         for data in datas:
             item = []  
             item.append( data['title']          )  
             item.append( data['quotaBytesUsed'] )  
-            item.append( str(data['shared'])    )  
-            item.append( data['webContentLink'] )
+            item.append( str(data['shared'])    )
+            if 'downloadUrl' in data:  
+                item.append(data['downloadUrl'])
+            else:
+                if 'webContentLink' in data:  
+                    item.append(data['webContentLink'])
+                else:    
+                    item.append('null-url')    
             files.append(item)  
           
         return files 
