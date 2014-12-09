@@ -23,7 +23,11 @@ class helper(nymph):
     #return:
     def listen(self,words):
         print(words)
-        data=json.loads(open('data.json','r').read())
+        try:
+            data=json.loads(open('data.json','r').read())
+        except Exception, error:
+            data=None
+            print"en error occured: %s " % (error)
         func={
             'read_OK':              self.read_Handler,
             'upload_OK':            self.upload_Handler,
