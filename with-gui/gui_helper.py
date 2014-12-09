@@ -134,7 +134,7 @@ class helper(nymph):
     def download(self,url):
         self.say('{ "query": "download", "0": "%s" }' % (url) )
     
-    def init():
+    def init(self):
         self.say('{ "query": "init" }')    
     #set the Other GDManager Node
     #
