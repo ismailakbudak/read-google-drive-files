@@ -10,7 +10,6 @@ class helpertry(helper):
     def listen_message_Handler(self,data):
         print(data)
     
-    
     def read_Handler(self,data):
         print(data)
     

@@ -1,4 +1,4 @@
-from nymph.Nymph import *
+from nymph.IP import *
 import json
 
 
@@ -14,7 +14,6 @@ class helper(nymph):
         self.managerNymphData = managerNymphData
         self.talkWith(managerNymphData)
 
-    
     #listen is processes coming data to other nymph
     #
     #parameters:
@@ -22,13 +21,12 @@ class helper(nymph):
     #
     #return:
     def listen(self,words):
-        print(words)
         f = open('data.json','r')
         try:
             data=json.loads(f.read())
         except Exception, error:
             data=None
-            print"en error occured: %s " % (error)
+            self.log("An error occured: %s " % (error))
         finally:
             f.close()    
         func={
@@ -45,8 +43,8 @@ class helper(nymph):
         if(words in func):
             func[words](data)
         else:
-            self.error_Manager_Handler('')
-        print(words)
+            self.error_Manager_Handler(data)
+        self.log(words)
         
     ###
     #	Handlers For events between two GDManager
@@ -105,8 +103,10 @@ class helper(nymph):
     #   is_share
     #
     #return:
-    def upload(self,filename,is_share):    
+    def upload(self,filename,is_share):
         self.say('{ "query": "upload", "0": "%s", "1": "%s" }' % ( filename, str(is_share) ))
+            
+                    
         
     #return an authorize url
     #
@@ -135,6 +135,9 @@ class helper(nymph):
     def download(self,url):
         self.say('{ "query": "download", "0": "%s" }' % (url) )
     
+    def log(self,message):
+        print "GUI :: %s" % message
+
     def init(self):
         self.say('{ "query": "init" }')    
     #set the Other GDManager Node
@@ -143,7 +146,7 @@ class helper(nymph):
     #   nymphdata
     #
     #return:
-    def talk(self,nymphdata,message,message_type):
-        a = (nymphdata.NAME, nymphdata.HOST, str(nymphdata.PORT), message, message_type )
-        self.say('{ "query": "talk", "0": "%s", "1": "%s", "2": "%s", "3": "%s", "4": "%s" }' % a)
+    def talk(self,nymphdata,message,message_type,file_title='None' ):
+        a = (nymphdata.NAME, nymphdata.HOST, str(nymphdata.PORT), message, message_type,file_title )
+        self.say('{ "query": "talk", "0": "%s", "1": "%s", "2": "%s", "3": "%s", "4": "%s", "5": "%s" }' % a)
         
