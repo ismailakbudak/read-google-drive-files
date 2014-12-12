@@ -660,7 +660,7 @@ if __name__ == "__main__":
 
     # Gui index  
     if sys.argv[1:]:
-        index=sys.argv[1]
+        gui_index=sys.argv[1]
     else:
         gui_index=0
     try:
@@ -668,29 +668,16 @@ if __name__ == "__main__":
     except Exception, error:
         print("Please enter a integer number..")
         exit()
-    if gui_index > len(nodes_gui) - 1:    
+    if gui_index > len(nodes_gui) - 1 and gui_index > len(nodes) - 1 :    
         print("Please enter a integer number less than %s.." % len(nodes))
         exit()
-
-    # Manager index    
-    if sys.argv[2:]:
-        index_manager=sys.argv[2]
-    else:
-        index_manager=0
-    try:
-        index_manager=int(index_manager)
-    except Exception, error:
-        print("Please enter a integer number..")
-        exit()
-    if index_manager > len(nodes) - 1:    
-        print("Please enter a integer number less than %s.." % len(nodes))
-        exit()    
-
+ 
     # Our nodes    
-    manager_node = nodes[index_manager]
+    manager_node = nodes[gui_index]
     gui_node = nodes_gui[gui_index]
-    if sys.argv[2:]: 
-        manager = GDManager( manager_node, gui_node)       
+    
+    manager = GDManager( manager_node, gui_node)       
+    
     MWindow = Win( gui_node , manager_node)
     MWindow.show()
     sys.exit(app.exec_())
