@@ -647,24 +647,50 @@ class Ui_MainWindow(helper):
             self.labelStatusUpload.setText("Please choose file...")
 
 class Win(QtGui.QDialog,Ui_MainWindow):
-    def __init__(self, index):
-        Ui_MainWindow.__init__(self, nodes_gui[index], nodes[index] )
+    def __init__(self, nymphdataGui, nymphDataManager):
+        Ui_MainWindow.__init__(self, nymphdataGui, nymphDataManager )
         QtGui.QDialog.__init__(self)
         self.setupUi(self)
 
 # Main application
 if __name__ == "__main__":
-    import sys 
+    import sys
+    from Manager import * 
     app = QtGui.QApplication(sys.argv)
+
+    # Gui index  
     if sys.argv[1:]:
         index=sys.argv[1]
     else:
-        index=0
+        gui_index=0
     try:
-        index=int(index)
+        gui_index=int(gui_index)
     except Exception, error:
         print("Please enter a integer number..")
-        exit()  
-    MWindow = Win(index)
+        exit()
+    if gui_index > len(nodes_gui) - 1:    
+        print("Please enter a integer number less than %s.." % len(nodes))
+        exit()
+
+    # Manager index    
+    if sys.argv[2:]:
+        index_manager=sys.argv[2]
+    else:
+        index_manager=0
+    try:
+        index_manager=int(index_manager)
+    except Exception, error:
+        print("Please enter a integer number..")
+        exit()
+    if index_manager > len(nodes) - 1:    
+        print("Please enter a integer number less than %s.." % len(nodes))
+        exit()    
+
+    # Our nodes    
+    manager_node = nodes[index_manager]
+    gui_node = nodes_gui[gui_index]
+    if sys.argv[2:]: 
+        manager = GDManager( manager_node, gui_node)       
+    MWindow = Win( gui_node , manager_node)
     MWindow.show()
     sys.exit(app.exec_())
