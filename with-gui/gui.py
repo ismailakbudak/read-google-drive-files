@@ -117,7 +117,10 @@ class Ui_MainWindow(helper):
                                 except Exception, error:
                                     self.log('There is no nymph data coming from nodes. An error occurred: %s' % error)
                     if nymphdata_receiver:
-                        self.talk(nymphdata_receiver, data['result'][1][3] ,'url', data['result'][1][0])
+                        title = data['result'][1][0]
+                        size = data['result'][1][1] 
+                        url = data['result'][1][3]
+                        self.talk(nymphdata_receiver, url ,'url', title, size)
                         self.log("url is sended")
                 except Exception, error:
                     self.log('An error occurred: %s' % error)            
@@ -668,16 +671,31 @@ if __name__ == "__main__":
     except Exception, error:
         print("Please enter a integer number..")
         exit()
-    if gui_index > len(nodes_gui) - 1 and gui_index > len(nodes) - 1 :    
+
+    # check manager index 
+    if sys.argv[2:]:
+        manager_index=sys.argv[2]
+        manager_status=True
+    else:
+        manager_status=False
+        manager_index=gui_index
+    try:
+        manager_index=int(manager_index)
+    except Exception, error:
+        print("Please enter a integer number..")
+        exit()
+
+    if gui_index > len(nodes_gui) - 1 and manager_index > len(nodes) - 1 :    
         print("Please enter a integer number less than %s.." % len(nodes))
         exit()
- 
+    
     # Our nodes    
-    manager_node = nodes[gui_index]
+    manager_node = nodes[manager_index]
     gui_node = nodes_gui[gui_index]
     
-    manager = GDManager( manager_node, gui_node)       
-    
+    # If there is a manager start it
+    if manager_status:
+        manager = GDManager( manager_node, gui_node)       
     MWindow = Win( gui_node , manager_node)
     MWindow.show()
     sys.exit(app.exec_())
