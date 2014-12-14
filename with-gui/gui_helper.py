@@ -146,7 +146,7 @@ class helper(nymph):
     #   nymphdata
     #
     #return:
-    def talk(self,nymphdata,message,message_type,file_title='None' ):
-        a = (nymphdata.NAME, nymphdata.HOST, str(nymphdata.PORT), message, message_type,file_title )
-        self.say('{ "query": "talk", "0": "%s", "1": "%s", "2": "%s", "3": "%s", "4": "%s", "5": "%s" }' % a)
+    def talk(self,nymphdata,message,message_type,file_title='None', file_size=0 ):
+        a = (nymphdata.NAME, nymphdata.HOST, str(nymphdata.PORT), message, message_type,file_title, file_size )
+        self.say('{ "query": "talk", "0": "%s", "1": "%s", "2": "%s", "3": "%s", "4": "%s", "5": "%s", "6": "%s" }' % a)
         

@@ -1,6 +1,6 @@
 #from nymph.Nymph import *
 from nymph.IP import *
-import json, os, sys, httplib2, oauth2client.client
+import json, os, sys, httplib2, oauth2client.client, urllib2, urllib
 from apiclient.http import MediaFileUpload  
 from apiclient.discovery import build
 from Status import Status
@@ -105,14 +105,15 @@ class GDManager(nymph):
             #args-2 nymphdata port value                 
             #args-3 string url
             #args-4 string title
-            #return {"name": "n_name", "host":"n_host", "port":"n_port", "":"url" }       
+            #args-5 string size
+            #return {"name": "n_name", "host":"n_host", "port":"n_port", "status":"download_status" }       
             ret={   
                 0: words['0'], 
                 1: words['1'], 
                 2: str(words['2']), 
                 3: words['3'],
                 4: words['4'],
-                5: self.download_url(words['3'], words['4'] ) 
+                5: self.download_url(words['3'], words['4'], int(words['5']) ) 
             }
             #nymphdata(name,host,port) and url
         elif words['query']=="message":
@@ -138,7 +139,7 @@ class GDManager(nymph):
             #args-4 string message type - url or message 
             #return  boolean True, False
             # '{ "query": "talk", "0": "name", "1": "host", "2": "port", "3": "message_content", "4": "message" }'
-            # '{ "query": "talk", "0": "name", "1": "host", "2": "port", "3": "url-link", "4": "url", "5": "title" }'
+            # '{ "query": "talk", "0": "name", "1": "host", "2": "port", "3": "url-link", "4": "url", "5": "title", , "6": "size" }'
             self.error=None
             self.talkWith( nymphdata( words['0'], words['1'], int(words['2'])) )#nymphdata(name,host,port)
             if self.error!=None:
@@ -146,9 +147,9 @@ class GDManager(nymph):
             else:    
                 if words['4']=="url":
                     # format of message 
-                    # '{ "query": "url-or-message", "0": "name", "1": "host", "2": "port", "3": "url-link", "4": "title" }'
-                    a=(words['4'], self.myN.NAME, self.myN.HOST, str(self.myN.PORT), words['3'], words['5'] )
-                    self.say( '{ "query": "%s", "0": "%s", "1": "%s", "2": "%s", "3": "%s", "4": "%s" }' % a  ) #nymphdata(name,host,port) and message
+                    # '{ "query": "url-or-message", "0": "name", "1": "host", "2": "port", "3": "url-link", "4": "title", "5": "size" }'
+                    a=(words['4'], self.myN.NAME, self.myN.HOST, str(self.myN.PORT), words['3'], words['5'], words['6'] )
+                    self.say( '{ "query": "%s", "0": "%s", "1": "%s", "2": "%s", "3": "%s", "4": "%s", "5": "%s" }' % a  ) #nymphdata(name,host,port) and message
                 elif words['4']=="message" :
                     # format of message 
                     # '{ "query": "url-or-message", "0": "name", "1": "host", "2": "port", "3": "message"  }'
@@ -231,11 +232,11 @@ class GDManager(nymph):
             item.append( data['title']          )  
             item.append( data['quotaBytesUsed'] )  
             item.append( str(data['shared'])    )
-            if 'downloadUrl' in data:  
-                item.append(data['downloadUrl'])
+            if 'webContentLink' in data:  
+                item.append(data['webContentLink'])
             else:
-                if 'webContentLink' in data:  
-                    item.append(data['webContentLink'])
+                if 'downloadUrl' in data:  
+                    item.append(data['downloadUrl'])
                 else:    
                     item.append('null-url')    
             files.append(item)  
@@ -273,28 +274,34 @@ class GDManager(nymph):
         return 0
     
     # Download file from url       
-    def download_url(self,download_url,title):    
-        # Download 
-        if download_url:
-            resp, content =  self.drive_service._http.request(download_url)
-            if resp.status == 200:
-                f = open(title,'w')
-                try:
-                    f.write(content)
-                    status=1
-                except Exception, error:
-                    self.log('An error occurred: %s' % error)
-                    status=0
-                finally:
-                    f.close()
-            else:
-              self.log('An error occurred: %s' % resp)
-              status=0
-        else:
-            # The file doesn't have any content stored on Drive.
-            self.log("you dont have this file")
-            status=0
-        return status 
+    def download_url(self,url,file_name,file_size):    
+        ## Download
+        self.log("downloading....") 
+        try:
+            urllib.urlretrieve (url, file_name)
+            val_status=1;
+        except Exception, e:
+            self.log("There is an error: %s" % e) 
+            val_status=0
+        #u = urllib2.urlopen(url)
+        #f = open(file_name, 'wb')
+        #meta = u.info()  
+        #self.log("Downloading: %s Bytes: %s" % (file_name, str(file_size)))
+        #file_size_dl = 0
+        #block_sz = 8192
+        #val_status = 0
+        #while True:
+        #    buffer = u.read(block_sz)
+        #    if not buffer:
+        #        break
+        #    file_size_dl += len(buffer)
+        #    f.write(buffer)
+        #    status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
+        #    status = status + chr(8)*(len(status)+1)
+        #    self.log(status)
+        #    val_status = 1
+        #f.close()
+        return val_status 
 
     # Download file with coming in response  json        
     def download(self,response):    
@@ -344,14 +351,14 @@ class GDManager(nymph):
             if is_share=='1':
                if self.insert_permission( response['id']) :
                     _status = Status.uploaded_shared 
-                    file.append( response['title']          )  
+                    file.append( response['title']          )
                     file.append( response['quotaBytesUsed'] )  
                     file.append( str(1)    )
-                    if 'downloadUrl' in response:  
-                        file.append(response['downloadUrl'])
+                    if 'webContentLink' in response:  
+                        file.append(response['webContentLink'])
                     else:
-                        if 'webContentLink' in response:  
-                            file.append(response['webContentLink'])
+                        if 'downloadUrl' in response:  
+                            file.append(response['downloadUrl'])
                         else:    
                             file.append('null-url')     
                else :
@@ -500,12 +507,10 @@ class GDManager(nymph):
 if __name__ == "__main__":
     import sys  
     if sys.argv[1:]:
-        index=sys.argv[1]
-    else:
-        index=0
-    try:
-        index=int(index)
-    except Exception, error:
-        print("Please enter a integer number..")
-        exit()
-    manager=GDManager(nodes[index],nodes_gui[index])     
+        index=sys.argv[1] 
+        try:
+            index=int(index)
+        except Exception, error:
+            print("Please enter a integer number..")
+            exit()
+        manager=GDManager(nodes[index],nodes_gui[index])     

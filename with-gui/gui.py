@@ -117,7 +117,10 @@ class Ui_MainWindow(helper):
                                 except Exception, error:
                                     self.log('There is no nymph data coming from nodes. An error occurred: %s' % error)
                     if nymphdata_receiver:
-                        self.talk(nymphdata_receiver, data['result'][1][3] ,'url', data['result'][1][0])
+                        title = data['result'][1][0]
+                        size = data['result'][1][1] 
+                        url = data['result'][1][3]
+                        self.talk(nymphdata_receiver, url ,'url', title, size)
                         self.log("url is sended")
                 except Exception, error:
                     self.log('An error occurred: %s' % error)            
@@ -647,24 +650,52 @@ class Ui_MainWindow(helper):
             self.labelStatusUpload.setText("Please choose file...")
 
 class Win(QtGui.QDialog,Ui_MainWindow):
-    def __init__(self, index):
-        Ui_MainWindow.__init__(self, nodes_gui[index], nodes[index] )
+    def __init__(self, nymphdataGui, nymphDataManager):
+        Ui_MainWindow.__init__(self, nymphdataGui, nymphDataManager )
         QtGui.QDialog.__init__(self)
         self.setupUi(self)
 
 # Main application
 if __name__ == "__main__":
-    import sys 
+    import sys
+    from Manager import * 
     app = QtGui.QApplication(sys.argv)
+
+    # Gui index  
     if sys.argv[1:]:
-        index=sys.argv[1]
+        gui_index=sys.argv[1]
     else:
-        index=0
+        gui_index=0
     try:
-        index=int(index)
+        gui_index=int(gui_index)
     except Exception, error:
         print("Please enter a integer number..")
-        exit()  
-    MWindow = Win(index)
+        exit()
+
+    # check manager index 
+    if sys.argv[2:]:
+        manager_index=sys.argv[2]
+        manager_status=True
+    else:
+        manager_status=False
+        manager_index=gui_index
+    try:
+        manager_index=int(manager_index)
+    except Exception, error:
+        print("Please enter a integer number..")
+        exit()
+
+    if gui_index > len(nodes_gui) - 1 and manager_index > len(nodes) - 1 :    
+        print("Please enter a integer number less than %s.." % len(nodes))
+        exit()
+    
+    # Our nodes    
+    manager_node = nodes[manager_index]
+    gui_node = nodes_gui[gui_index]
+    
+    # If there is a manager start it
+    if manager_status:
+        manager = GDManager( manager_node, gui_node)       
+    MWindow = Win( gui_node , manager_node)
     MWindow.show()
     sys.exit(app.exec_())
